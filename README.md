@@ -31,9 +31,16 @@ https://github.com/SquareSquash/ruby
 Usage
 -----
 
-See the `squash_ruby` gem for installation and configuration instructions. Note
-that it is no longer necessary to set the `:environment` configuration option;
-the Rails client library automatically sets that to the Rails environment.
+Add this gem and the Squash Ruby gem to your Gemfile:
+
+```` ruby
+gem 'squash_ruby', :require => 'squash/ruby'
+gem 'squash_rails', :require => 'squash/rails'
+````
+
+See the `squash_ruby` gem for configuration instructions. Note that it is no
+longer necessary to set the `:environment` configuration option; the Rails
+client library automatically sets that to the Rails environment.
 
 You can use the usual `Squash::Ruby.notify` method in your Rails projects, but
 you will miss out on some Rails-specific information in your exception logs. You
