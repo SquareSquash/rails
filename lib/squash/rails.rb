@@ -25,6 +25,19 @@ end
 module Squash::Ruby
   CONFIGURATION_DEFAULTS[:deploy_path] = "/api/1.0/deploy"
 
+  # @private
+  def self.failsafe_log(tag, message)
+    logger = Rails.respond_to?(:logger) ? Rails.logger : RAILS_DEFAULT_LOGGER
+    if (logger.respond_to?(:tagged))
+      logger.tagged(tag) { logger.error message }
+    else
+      logger.error "[#{tag}]\t#{message}"
+    end
+  rescue Object => err
+    $stderr.puts "Couldn't write to failsafe log (#{err.to_s}); writing to stderr instead."
+    $stderr.puts "#{Time.now.to_s}\t[#{tag}]\t#{message}"
+  end
+
   private
 
   def self.client_name() 'rails' end

@@ -32,4 +32,41 @@ describe Squash::Ruby do
       hsh['message'].should eql('foobar')
     end
   end
+
+  describe "#failsafe_logger" do
+    before :each do
+      @logger = Logger.new(STDOUT)
+      class << @logger
+        attr_reader :error_messages
+        def error(*args) (@error_messages ||= []) << args end
+      end
+    end
+
+    it "should log to the Rails logger" do
+      Rails.stub(:logger).and_return(@logger)
+      @logger.should_receive(:tagged).once.with('tag').and_yield
+      Squash::Ruby.failsafe_log 'tag', 'message'
+      @logger.error_messages.should eql([['message']])
+    end
+
+    it "should be Rails 2 compatible" do
+      Rails.stub(:logger).and_return(@logger)
+      Squash::Ruby.failsafe_log 'tag', 'message'
+      @logger.error_messages.should eql([["[tag]\tmessage"]])
+    end
+
+    it "should be Rails 1 compatible" do
+      Rails = OpenStruct.new(:env => 'RAILS_ENV', :root => 'RAILS_ROOT')
+      ::RAILS_DEFAULT_LOGGER = @logger
+      Squash::Ruby.failsafe_log 'tag', 'message'
+      @logger.error_messages.should eql([["[tag]\tmessage"]])
+    end
+
+    it "should failsafe itself to stderr" do
+      Rails.stub(:logger).and_return(@logger)
+      @logger.should_receive(:error).once.and_raise(ArgumentError)
+      $stderr.should_receive(:puts).any_number_of_times
+      lambda { Squash::Ruby.failsafe_log 'tag', 'message' }.should_not raise_error
+    end
+  end
 end
