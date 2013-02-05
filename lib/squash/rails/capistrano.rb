@@ -14,11 +14,15 @@
 
 # Capistrano tasks for Rails apps using Squash.
 
-desc "Notifies Squash of a new deploy."
-task 'squash:notify', :roles => :web, :only => {:primary => true}, :except => {:no_release => true} do
-  rails_env = fetch(:rails_env, 'production')
-  run "bundle exec rake squash:notify REVISION=#{real_revision} DEPLOY_ENV=#{rails_env}"
-end
+Capistrano::Configuration.instance.load do
+  namespace :squash do
+    desc "Notifies Squash of a new deploy."
+    task :notify, :roles => :web, :only => {:primary => true}, :except => {:no_release => true} do
+      rails_env = fetch(:rails_env, 'production')
+      run "cd #{current_path} && env RAILS_ENV=#{rails_env} #{fetch(:bundle_cmd, "bundle")} exec rake squash:notify REVISION=#{real_revision} DEPLOY_ENV=#{rails_env}"
+    end
+  end
 
-after 'deploy:restart', 'squash:notify'
-after 'deploy:start', 'squash:notify'
+  after 'deploy:restart', 'squash:notify'
+  after 'deploy:start', 'squash:notify'
+end
