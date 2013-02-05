@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "squash_rails"
-  s.version = "1.0.0"
+  s.version = "1.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Tim Morgan"]
-  s.date = "2012-10-18"
+  s.date = "2013-02-05"
   s.description = "This client library records Ruby on Rails exceptions to Squash."
   s.email = "tim@squareup.com"
   s.extra_rdoc_files = [
@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
     "lib/squash/rails.rb",
     "lib/squash/rails/capistrano.rb",
     "lib/squash/rails/configure.rb",
+    "lib/squash/rails/rack.rb",
     "lib/squash/rails/tasks.rake",
     "lib/squash/ruby/controller_methods.rb",
     "lib/squash/ruby/railtie.rb",
