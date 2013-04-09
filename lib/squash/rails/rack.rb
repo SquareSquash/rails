@@ -49,25 +49,31 @@ module Squash
       #   middleware gives to `Squash::Ruby.notify`.
 
       def squash_rack_data
-        {
-          :environment    => environment_name,
-          :root           => root_path,
+        data = {
+            :environment    => environment_name,
+            :root           => root_path,
 
-          :headers        => filter_for_squash(request_headers, :headers),
-          :request_method => @env['REQUEST_METHOD'].to_s.upcase,
-          :schema         => @env['rack.url_scheme'],
-          :host           => @env['SERVER_NAME'],
-          :port           => @env['SERVER_PORT'],
-          :path           => @env['PATH_INFO'],
-          :query          => @env['QUERY_STRING'],
+            :headers        => filter_for_squash(request_headers, :headers),
+            :request_method => @env['REQUEST_METHOD'].to_s.upcase,
+            :schema         => @env['rack.url_scheme'],
+            :host           => @env['SERVER_NAME'],
+            :port           => @env['SERVER_PORT'],
+            :path           => @env['PATH_INFO'],
+            :query          => @env['QUERY_STRING'],
 
-          :params         => filter_for_squash(@env['action_dispatch.request.parameters'], :params),
-          :session        => filter_for_squash(@env['rack.session'], :session),
-          :flash          => filter_for_squash(@env[ActionDispatch::Flash::KEY], :flash),
-          :cookies        => filter_for_squash(@env['rack.request.cookie_hash'], :cookies),
+            :params         => filter_for_squash(@env['action_dispatch.request.parameters'], :params),
+            :session        => filter_for_squash(@env['rack.session'], :session),
+            :cookies        => filter_for_squash(@env['rack.request.cookie_hash'], :cookies),
 
-          :"rack.env"     => filter_for_squash(@env, :rack)
+            :"rack.env"     => filter_for_squash(@env, :rack)
         }
+
+        if data[:session]
+          flash_key    = defined?(ActionDispatch) ? ActionDispatch::Flash::KEY : 'flash'
+          data[:flash] = filter_for_squash(data[:session].delete(flash_key) || {}, :flash)
+        end
+
+        data
       end
 
       private
