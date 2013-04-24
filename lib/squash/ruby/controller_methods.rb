@@ -45,6 +45,7 @@ module Squash::Ruby::ControllerMethods
   #   exceptions are ignored and not reported to Squash.)
 
   def notify_squash(exception, user_data={})
+    exception.instance_variable_set :@_squash_controller_notified, true
     Squash::Ruby.notify exception, user_data.merge(squash_rails_data)
   end
 

@@ -24,6 +24,20 @@ describe Squash::Rails::Rack do
 
         env.should have_key('squash.notified')
       end
+      
+      it "should not notify Squash if the controller already did so" do
+        error = StandardError.new("Downstream error")
+        error.instance_variable_set :@_squash_controller_notified, true
+        app.should_receive(:call).and_raise(error)
+
+        Squash::Ruby.should_not_receive(:notify)
+
+        expect {
+          subject.call(env)
+        }.to raise_error(/Downstream error/)
+
+        env.should_not have_key('squash.notified')
+      end
     end
 
     context 'when app does not raise an error' do

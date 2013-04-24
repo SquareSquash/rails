@@ -86,6 +86,13 @@ describe Squash::Ruby::ControllerMethods do
       notify_squash @exception
     end
 
+    it "should set the controller-notified flag on the exception" do
+      Squash::Ruby.should_receive(:notify).once do |exception, _options|
+        exception.instance_variable_get(:@_squash_controller_notified).should be_true
+      end
+      notify_squash @exception
+    end
+
     it "should add user data" do
       Squash::Ruby.should_receive(:notify).once.with(anything, hash_including(:user => 'data'))
       notify_squash @exception, :user => 'data'
