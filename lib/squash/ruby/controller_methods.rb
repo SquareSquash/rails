@@ -91,13 +91,10 @@ module Squash::Ruby::ControllerMethods
   #   {#notify_squash} gives to `Squash::Ruby.notify`.
 
   def squash_rails_data
-    flash_hash = flash.to_hash.stringify_keys
+    flash_hash      = flash.to_hash.stringify_keys
     filtered_params = request.respond_to?(:filtered_parameters) ? request.filtered_parameters : filter_parameters(params)
-    headers = if defined?(Rails) && Rails.version >= '4.0.0'
-                request.headers
-              else
-                request.headers.to_hash
-              end
+    headers         = Hash.new
+    request.headers.each { |key, value| headers[key] = value }
 
     {
         :environment    => Rails.env.to_s,
@@ -168,7 +165,7 @@ module Squash::Ruby::ControllerMethods
   def _filter_for_squash(data, kind)
     case kind
       when :headers
-        data.reject { |key, _| key !~ /^[A-Z0-9_]+$/  || FILTERED_HEADERS.include?(key) }
+        data.reject { |key, _| key !~ /^[A-Z0-9_]+$/ || FILTERED_HEADERS.include?(key) }
       else
         data
     end
