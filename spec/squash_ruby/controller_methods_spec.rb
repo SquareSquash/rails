@@ -17,7 +17,7 @@ require 'ostruct'
 
 # Fake Rails-in-a-box
 module Railsish
-  ::Rails = OpenStruct.new(:env => 'RAILS_ENV', :root => 'RAILS_ROOT')
+  ::Rails = OpenStruct.new(:env => 'RAILS_ENV', :root => 'RAILS_ROOT', :version => '3.2.0')
 
   def request
     @request ||= OpenStruct.new(

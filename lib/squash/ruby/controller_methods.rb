@@ -93,12 +93,17 @@ module Squash::Ruby::ControllerMethods
   def squash_rails_data
     flash_hash = flash.to_hash.stringify_keys
     filtered_params = request.respond_to?(:filtered_parameters) ? request.filtered_parameters : filter_parameters(params)
+    headers = if defined?(Rails) && Rails.version >= '4.0.0'
+                request.headers
+              else
+                request.headers.to_hash
+              end
 
     {
         :environment    => Rails.env.to_s,
         :root           => Rails.root.to_s,
 
-        :headers        => filter_for_squash(_filter_for_squash(request.headers.to_hash, :headers), :headers),
+        :headers        => filter_for_squash(_filter_for_squash(headers, :headers), :headers),
         :request_method => request.request_method.to_s.upcase,
         :schema         => request.protocol.sub('://', ''),
         :host           => request.host,

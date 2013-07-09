@@ -56,7 +56,7 @@ describe Squash::Ruby do
     end
 
     it "should be Rails 1 compatible" do
-      Rails = OpenStruct.new(:env => 'RAILS_ENV', :root => 'RAILS_ROOT')
+      Rails = OpenStruct.new(:env => 'RAILS_ENV', :root => 'RAILS_ROOT', :version => '3.2.0')
       ::RAILS_DEFAULT_LOGGER = @logger
       Squash::Ruby.failsafe_log 'tag', 'message'
       @logger.error_messages.should eql([["[tag]\tmessage"]])
