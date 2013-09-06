@@ -60,3 +60,5 @@ module Squash::Ruby
     alias_method_chain :exception_info_hash, :rails
   end
 end
+
+require 'squash/rails/sidekiq' if defined?(Sidekiq)
