@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "squash_rails"
-  s.version = "1.2.0"
+  s.version = "1.3.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Tim Morgan"]
-  s.date = "2013-09-06"
+  s.date = "2013-11-26"
   s.description = "This client library records Ruby on Rails exceptions to Squash."
   s.email = "tim@squareup.com"
   s.extra_rdoc_files = [
@@ -20,37 +20,39 @@ Gem::Specification.new do |s|
     "LICENSE.txt",
     "README.md",
     "lib/squash/rails.rb",
-    "lib/squash/rails/capistrano.rb",
+    "lib/squash/rails/capistrano2.rb",
+    "lib/squash/rails/capistrano3.rb",
     "lib/squash/rails/configure.rb",
     "lib/squash/rails/rack.rb",
     "lib/squash/rails/sidekiq.rb",
     "lib/squash/rails/tasks.rake",
     "lib/squash/ruby/controller_methods.rb",
     "lib/squash/ruby/railtie.rb",
+    "lib/tasks/squash.cap",
     "rails/init.rb"
   ]
   s.homepage = "http://github.com/SquareSquash/rails"
   s.licenses = ["Apache 2.0"]
   s.require_paths = ["lib"]
-  s.rubygems_version = "1.8.25"
+  s.rubygems_version = "2.0.11"
   s.summary = "Squash client for Ruby on Rails projects"
 
   if s.respond_to? :specification_version then
-    s.specification_version = 3
+    s.specification_version = 4
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<squash_ruby>, [">= 0"])
       s.add_development_dependency(%q<rails>, [">= 0"])
       s.add_development_dependency(%q<rspec>, [">= 0"])
       s.add_development_dependency(%q<yard>, [">= 0"])
-      s.add_development_dependency(%q<redcarpet>, [">= 0"])
+      s.add_development_dependency(%q<redcarpet>, ["< 3.0.0"])
       s.add_development_dependency(%q<jeweler>, [">= 0"])
     else
       s.add_dependency(%q<squash_ruby>, [">= 0"])
       s.add_dependency(%q<rails>, [">= 0"])
       s.add_dependency(%q<rspec>, [">= 0"])
       s.add_dependency(%q<yard>, [">= 0"])
-      s.add_dependency(%q<redcarpet>, [">= 0"])
+      s.add_dependency(%q<redcarpet>, ["< 3.0.0"])
       s.add_dependency(%q<jeweler>, [">= 0"])
     end
   else
@@ -58,7 +60,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<rails>, [">= 0"])
     s.add_dependency(%q<rspec>, [">= 0"])
     s.add_dependency(%q<yard>, [">= 0"])
-    s.add_dependency(%q<redcarpet>, [">= 0"])
+    s.add_dependency(%q<redcarpet>, ["< 3.0.0"])
     s.add_dependency(%q<jeweler>, [">= 0"])
   end
 end
