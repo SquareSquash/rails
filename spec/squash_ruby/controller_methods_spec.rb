@@ -100,19 +100,19 @@ describe Squash::Ruby::ControllerMethods do
     end
 
     it "should filter out Rack headers" do
-      request.stub!(:headers).and_return('rack.onething' => 'foo', 'OTHER_THING' => 'bar')
+      request.stub(:headers).and_return('rack.onething' => 'foo', 'OTHER_THING' => 'bar')
       Squash::Ruby.should_receive(:notify).once.with(anything, hash_including(:headers => {'OTHER_THING' => 'bar'}))
       notify_squash @exception
     end
 
     it "should filter the HTTP-Authorization header" do
-      request.stub!(:headers).and_return('HTTP_AUTHORIZATION' => 'foo', 'http-authorization' => 'bar')
+      request.stub(:headers).and_return('HTTP_AUTHORIZATION' => 'foo', 'http-authorization' => 'bar')
       Squash::Ruby.should_receive(:notify).once.with(anything, hash_including(:headers => {}))
       notify_squash @exception
     end
 
     it "should filter the RAW_POST_DATA header" do
-      request.stub!(:headers).and_return('RAW_POST_DATA' => 'foo')
+      request.stub(:headers).and_return('RAW_POST_DATA' => 'foo')
       Squash::Ruby.should_receive(:notify).once.with(anything, hash_including(:headers => {}))
       notify_squash @exception
     end
@@ -123,7 +123,7 @@ describe Squash::Ruby::ControllerMethods do
       end
 
       Squash::Ruby.should_receive(:notify).once.with(anything, hash_including(:headers => {'DONT_DELETE' => 'keep'}))
-      request.stub!(:headers).and_return('DELETE_ME' => 'delete', 'DONT_DELETE' => 'keep')
+      request.stub(:headers).and_return('DELETE_ME' => 'delete', 'DONT_DELETE' => 'keep')
       notify_squash @exception
     end
 
@@ -133,8 +133,8 @@ describe Squash::Ruby::ControllerMethods do
       end
 
       Squash::Ruby.should_receive(:notify).once.with(anything, hash_including(:params => {'dontdelete' => 'keep'}))
-      request.stub!(:filtered_parameters).and_return('deleteme' => 'delete', 'dontdelete' => 'keep')
-      request.stub!(:filtered_parameters).and_return('deleteme' => 'delete', 'dontdelete' => 'keep')
+      request.stub(:filtered_parameters).and_return('deleteme' => 'delete', 'dontdelete' => 'keep')
+      request.stub(:filtered_parameters).and_return('deleteme' => 'delete', 'dontdelete' => 'keep')
       notify_squash @exception
     end
 

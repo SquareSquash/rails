@@ -73,7 +73,7 @@ describe Squash::Ruby do
     it "should failsafe itself to stderr" do
       Rails.stub(:logger).and_return(@logger)
       @logger.should_receive(:error).once.and_raise(ArgumentError)
-      $stderr.should_receive(:puts).any_number_of_times
+      $stderr.stub(:puts)
       lambda { Squash::Ruby.failsafe_log 'tag', 'message' }.should_not raise_error
     end
   end
