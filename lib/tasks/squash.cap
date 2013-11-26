@@ -1,0 +1,45 @@
+# Copyright 2013 Square Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+# Capistrano tasks for Rails apps using Squash.
+
+set :current_revision, lambda { `git rev-parse #{fetch :branch}`.chomp }
+
+namespace :squash do
+  # USAGE: before 'deploy:publishing', 'squash:write_revision'
+  desc "Writes a REVISION file to the application's root directory"
+  task :write_revision do
+    on roles(:app) do
+      execute %{echo "#{fetch :current_revision}" > #{release_path.join('REVISION')}}
+    end
+  end
+
+  desc "Notifies Squash of a new deploy"
+  task :notify do
+    on roles(:web), :limit => 1 do
+      within release_path do
+        with :rails_env => fetch(:rails_env) do
+          command = if test("[ -e #{release_path.join('bin', 'rails')} ]")
+                      'bin/rails'
+                    else
+                      'script/rails'
+                    end
+          execute command, "runner 'Squash::Ruby.notify_deploy #{fetch(:rails_env).inspect}, #{fetch(:current_revision).inspect}, #{Socket.gethostname.inspect}'"
+        end
+      end
+    end
+  end
+end
+
+after 'deploy:finishing', 'squash:notify'

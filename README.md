@@ -95,8 +95,24 @@ Deploys
 -------
 
 Squash works best when you notify it if your web app's deploys. If you're using
-Capistrano, this is easy: Just add `require 'squash/rails/capistrano'` to your
-`config/deploy.rb` file. Everything else should be taken care of.
+Capistrano, this is easy. For **Capistrano 2**, just add
+`require 'squash/rails/capistrano2'` to your `config/deploy.rb` file. Everything
+else should be taken care of. For **Capistrano 3**, just add
+`require 'squash/rails/capistrano3'` to your `Capfile`.
+
+If you do not deploy to a live Git directory, you will need to write a
+`REVISION` file to your app root. To do this, include the following in your
+`config/deploy.rb` file in Capistrano 3:
+
+```` ruby
+before 'deploy:publishing', 'squash:write_revision'
+````
+
+or in Capistrano 2:
+
+```` ruby
+before 'deploy:assets:precompile', 'squash:write_revision'
+````
 
 If you're not using Capistrano, you will need to configure your deploy script
 so that it runs the `squash:notify` Rake task on every deploy target. This Rake

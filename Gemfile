@@ -10,7 +10,7 @@ group :development do
 
   # DOCS
   gem 'yard', :require => nil
-  gem 'redcarpet', :require => nil
+  gem 'redcarpet', '< 3.0.0', :require => nil
 
   # DEVELOPMENT
   gem 'jeweler'

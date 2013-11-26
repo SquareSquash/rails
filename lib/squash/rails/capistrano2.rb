@@ -16,6 +16,12 @@
 
 Capistrano::Configuration.instance.load do
   namespace :squash do
+    # USAGE: before 'deploy:assets:precompile', 'squash:write_revision'
+    desc "Writes a REVISION file to the application's root directory"
+    task :write_revision, :roles => :app do
+      run %{echo "#{real_revision}" > #{release_path}/REVISION}
+    end
+
     desc "Notifies Squash of a new deploy."
     task :notify, :roles => :web, :only => {:primary => true}, :except => {:no_release => true} do
       rails_env = fetch(:rails_env, 'production')
