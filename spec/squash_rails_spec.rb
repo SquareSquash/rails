@@ -13,7 +13,15 @@
 #    limitations under the License.
 
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
-require 'active_record/errors'
+
+require 'active_support/core_ext/class/attribute_accessors'
+require 'active_support/core_ext/class/delegating_attributes'
+require 'active_support/core_ext/class/inheritable_attributes'
+require 'active_support/core_ext/blank'
+require 'active_support/core_ext/array'
+require 'active_record'
+require 'active_record/base'
+require 'action_controller'
 
 describe Squash::Ruby do
   describe "#notify" do

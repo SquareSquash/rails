@@ -14,6 +14,7 @@
 
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 require 'ostruct'
+require 'squash/ruby/controller_methods'
 
 # Fake Rails-in-a-box
 module Railsish
@@ -37,7 +38,7 @@ module Railsish
   end
 
   def flash()
-    fl             = ActionDispatch::Flash::FlashHash.new
+    fl             = ActionController::Flash::FlashHash.new
     fl[:some]      = 'hash'
     fl.now[:other] = 'key'
     fl
@@ -153,7 +154,7 @@ describe Squash::Ruby::ControllerMethods do
       end
 
       Squash::Ruby.should_receive(:notify).once.with(anything, hash_including(:flash => {'dontdelete' => 'keep'}))
-      fl               = ActionDispatch::Flash::FlashHash.new
+      fl               = ActionController::Flash::FlashHash.new
       fl['deleteme']   = 'delete'
       fl['dontdelete'] = 'keep'
       stub!(:flash).and_return(fl)

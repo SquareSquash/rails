@@ -57,7 +57,8 @@ module Squash::Ruby
   end
 
   class << self
-    alias_method_chain :exception_info_hash, :rails
+    alias_method :exception_info_hash_without_rails, :exception_info_hash
+    alias_method :exception_info_hash, :exception_info_hash_with_rails
   end
 end
 
