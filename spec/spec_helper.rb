@@ -12,12 +12,61 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+require 'logger'
 require 'bundler'
 Bundler.require :default, :development
-require 'active_support/core_ext/module/aliasing'
+require 'active_support/core_ext/object'
+require 'active_support/core_ext/array'
+require 'active_support/core_ext/module'
 
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 $LOAD_PATH.unshift File.dirname(__FILE__)
+
+require 'action_controller'
+require 'active_record'
+require 'active_record/base'
+
+# Fake Rails-in-a-box
+Rails = OpenStruct.new(:env => 'RAILS_ENV', :root => 'RAILS_ROOT') unless defined?(Rails)
+
+module Railsish
+  def request
+    @request ||= OpenStruct.new(
+        :xhr?                => true,
+        :headers             => { 'SOME' => 'Headers' },
+        :request_method      => :get,
+        :protocol            => 'https://',
+        :host                => 'www.example.com',
+        :port                => 443,
+        :path                => '/example',
+        :query_string        => 'some=example&here=also',
+        :filtered_parameters => { 'some' => 'params' })
+  end
+
+  def session()
+    { 'some' => 'session' }
+  end
+
+  def flash
+    fl             = if defined?(ActionDispatch)
+                       ActionDispatch::Flash::FlashHash.new
+                     else
+                       ActionController::Flash::FlashHash.new
+                     end
+    fl[:some]      = 'hash'
+    fl.now[:other] = 'key'
+    fl
+  end
+
+  def cookies
+    jar = Object.new
+    jar.send :instance_variable_set, :@cookies, {'some' => 'cookies'}
+    jar
+  end
+
+  def controller_name() 'controller_name' end
+  def action_name() 'action_name' end
+end
 
 require 'squash/rails'
 

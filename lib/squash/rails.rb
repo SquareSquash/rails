@@ -13,6 +13,9 @@
 #    limitations under the License.
 
 require 'squash/ruby'
+require 'active_support/core_ext/array'
+require 'active_support/core_ext/module'
+
 if defined?(Rails)
   require 'squash/ruby/controller_methods'
   require 'squash/ruby/railtie'

@@ -26,7 +26,7 @@ require 'action_controller'
 describe Squash::Ruby do
   describe "#notify" do
     it "should report the client type as 'rails'" do
-      Squash::Ruby.client_name.should eql('rails')
+      expect(Squash::Ruby.client_name).to eql('rails')
     end
 
     it "should unwrap ActiveRecord::StatementInvalid errors" do
@@ -36,8 +36,8 @@ describe Squash::Ruby do
       end
 
       hsh = Squash::Ruby.send(:exception_info_hash, err, Time.now, {}, [])
-      hsh['class_name'].should eql('Mysql2::Error')
-      hsh['message'].should eql('foobar')
+      expect(hsh['class_name']).to eql('Mysql2::Error')
+      expect(hsh['message']).to eql('foobar')
     end
   end
 
@@ -51,30 +51,30 @@ describe Squash::Ruby do
     end
 
     it "should log to the Rails logger" do
-      Rails.stub(:logger).and_return(@logger)
-      @logger.should_receive(:tagged).once.with('tag').and_yield
+      allow(Rails).to receive(:logger).and_return(@logger)
+      expect(@logger).to receive(:tagged).once.with('tag').and_yield
       Squash::Ruby.failsafe_log 'tag', 'message'
-      @logger.error_messages.should eql([['message']])
+      expect(@logger.error_messages).to eql([['message']])
     end
 
     it "should be Rails 2 compatible" do
-      Rails.stub(:logger).and_return(@logger)
+      allow(Rails).to receive(:logger).and_return(@logger)
       Squash::Ruby.failsafe_log 'tag', 'message'
-      @logger.error_messages.should eql([["[tag]\tmessage"]])
+      expect(@logger.error_messages).to eql([["[tag]\tmessage"]])
     end
 
     it "should be Rails 1 compatible" do
       Rails = OpenStruct.new(:env => 'RAILS_ENV', :root => 'RAILS_ROOT', :version => '3.2.0')
       ::RAILS_DEFAULT_LOGGER = @logger
       Squash::Ruby.failsafe_log 'tag', 'message'
-      @logger.error_messages.should eql([["[tag]\tmessage"]])
+      expect(@logger.error_messages).to eql([["[tag]\tmessage"]])
     end
 
     it "should failsafe itself to stderr" do
-      Rails.stub(:logger).and_return(@logger)
-      @logger.should_receive(:error).once.and_raise(ArgumentError)
-      $stderr.stub(:puts)
-      lambda { Squash::Ruby.failsafe_log 'tag', 'message' }.should_not raise_error
+      allow(Rails).to receive(:logger).and_return(@logger)
+      expect(@logger).to receive(:error).once.and_raise(ArgumentError)
+      allow($stderr).to receive(:puts)
+      expect { Squash::Ruby.failsafe_log 'tag', 'message' }.not_to raise_error
     end
   end
 end

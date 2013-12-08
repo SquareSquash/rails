@@ -78,7 +78,7 @@ PLATFORMS
 
 DEPENDENCIES
   jeweler
-  rails
+  rails (< 4.0.0)
   redcarpet (< 3.0.0)
   rspec
   squash_ruby

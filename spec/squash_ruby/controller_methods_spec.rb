@@ -12,47 +12,8 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 require 'ostruct'
-require 'squash/ruby/controller_methods'
-
-# Fake Rails-in-a-box
-module Railsish
-  ::Rails = OpenStruct.new(:env => 'RAILS_ENV', :root => 'RAILS_ROOT', :version => '3.2.0')
-
-  def request
-    @request ||= OpenStruct.new(
-        :xhr?                => true,
-        :headers             => {'SOME' => 'Headers'},
-        :request_method      => :get,
-        :protocol            => 'https://',
-        :host                => 'www.example.com',
-        :port                => 443,
-        :path                => '/example',
-        :query_string        => 'some=example&here=also',
-        :filtered_parameters => {'some' => 'params'})
-  end
-
-  def session()
-    {'some' => 'session'}
-  end
-
-  def flash()
-    fl             = ActionController::Flash::FlashHash.new
-    fl[:some]      = 'hash'
-    fl.now[:other] = 'key'
-    fl
-  end
-
-  def cookies()
-    jar = Object.new
-    jar.send :instance_variable_set, :@cookies, {'some' => 'cookies'}
-    jar
-  end
-
-  def controller_name() 'controller_name' end
-  def action_name() 'action_name' end
-end
+require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe Squash::Ruby::ControllerMethods do
   include Squash::Ruby::ControllerMethods
@@ -68,7 +29,7 @@ describe Squash::Ruby::ControllerMethods do
     end
 
     it "should call Squash::Ruby.notify with additional Rails information" do
-      Squash::Ruby.should_receive(:notify).once.with(@exception,
+      expect(Squash::Ruby).to receive(:notify).once.with(@exception,
                                                      :headers        => {'SOME' => 'Headers'},
                                                      :request_method => 'GET',
                                                      :schema         => 'https',
@@ -88,32 +49,32 @@ describe Squash::Ruby::ControllerMethods do
     end
 
     it "should set the controller-notified flag on the exception" do
-      Squash::Ruby.should_receive(:notify).once do |exception, _options|
-        exception.instance_variable_get(:@_squash_controller_notified).should be_true
+      expect(Squash::Ruby).to receive(:notify).once do |exception, _options|
+        expect(exception.instance_variable_get(:@_squash_controller_notified)).to be_true
       end
       notify_squash @exception
     end
 
     it "should add user data" do
-      Squash::Ruby.should_receive(:notify).once.with(anything, hash_including(:user => 'data'))
+      expect(Squash::Ruby).to receive(:notify).once.with(anything, hash_including(:user => 'data'))
       notify_squash @exception, :user => 'data'
     end
 
     it "should filter out Rack headers" do
-      request.stub(:headers).and_return('rack.onething' => 'foo', 'OTHER_THING' => 'bar')
-      Squash::Ruby.should_receive(:notify).once.with(anything, hash_including(:headers => {'OTHER_THING' => 'bar'}))
+      allow(request).to receive(:headers).and_return('rack.onething' => 'foo', 'OTHER_THING' => 'bar')
+      expect(Squash::Ruby).to receive(:notify).once.with(anything, hash_including(:headers => {'OTHER_THING' => 'bar'}))
       notify_squash @exception
     end
 
     it "should filter the HTTP-Authorization header" do
-      request.stub(:headers).and_return('HTTP_AUTHORIZATION' => 'foo', 'http-authorization' => 'bar')
-      Squash::Ruby.should_receive(:notify).once.with(anything, hash_including(:headers => {}))
+      allow(request).to receive(:headers).and_return('HTTP_AUTHORIZATION' => 'foo', 'http-authorization' => 'bar')
+      expect(Squash::Ruby).to receive(:notify).once.with(anything, hash_including(:headers => {}))
       notify_squash @exception
     end
 
     it "should filter the RAW_POST_DATA header" do
-      request.stub(:headers).and_return('RAW_POST_DATA' => 'foo')
-      Squash::Ruby.should_receive(:notify).once.with(anything, hash_including(:headers => {}))
+      allow(request).to receive(:headers).and_return('RAW_POST_DATA' => 'foo')
+      expect(Squash::Ruby).to receive(:notify).once.with(anything, hash_including(:headers => {}))
       notify_squash @exception
     end
 
@@ -122,8 +83,8 @@ describe Squash::Ruby::ControllerMethods do
         kind == :headers ? data.delete_if { |k, _| k =='DELETE_ME' } : data
       end
 
-      Squash::Ruby.should_receive(:notify).once.with(anything, hash_including(:headers => {'DONT_DELETE' => 'keep'}))
-      request.stub(:headers).and_return('DELETE_ME' => 'delete', 'DONT_DELETE' => 'keep')
+      expect(Squash::Ruby).to receive(:notify).once.with(anything, hash_including(:headers => {'DONT_DELETE' => 'keep'}))
+      allow(request).to receive(:headers).and_return('DELETE_ME' => 'delete', 'DONT_DELETE' => 'keep')
       notify_squash @exception
     end
 
@@ -132,9 +93,9 @@ describe Squash::Ruby::ControllerMethods do
         kind == :params ? data.delete_if { |k, _| k =='deleteme' } : data
       end
 
-      Squash::Ruby.should_receive(:notify).once.with(anything, hash_including(:params => {'dontdelete' => 'keep'}))
-      request.stub(:filtered_parameters).and_return('deleteme' => 'delete', 'dontdelete' => 'keep')
-      request.stub(:filtered_parameters).and_return('deleteme' => 'delete', 'dontdelete' => 'keep')
+      expect(Squash::Ruby).to receive(:notify).once.with(anything, hash_including(:params => {'dontdelete' => 'keep'}))
+      allow(request).to receive(:filtered_parameters).and_return('deleteme' => 'delete', 'dontdelete' => 'keep')
+      allow(request).to receive(:filtered_parameters).and_return('deleteme' => 'delete', 'dontdelete' => 'keep')
       notify_squash @exception
     end
 
@@ -143,8 +104,8 @@ describe Squash::Ruby::ControllerMethods do
         kind == :session ? data.delete_if { |k, _| k =='deleteme' } : data
       end
 
-      Squash::Ruby.should_receive(:notify).once.with(anything, hash_including(:session => {'dontdelete' => 'keep'}))
-      stub!(:session).and_return('deleteme' => 'delete', 'dontdelete' => 'keep')
+      expect(Squash::Ruby).to receive(:notify).once.with(anything, hash_including(:session => {'dontdelete' => 'keep'}))
+      allow(self).to receive(:session).and_return('deleteme' => 'delete', 'dontdelete' => 'keep')
       notify_squash @exception
     end
 
@@ -153,11 +114,15 @@ describe Squash::Ruby::ControllerMethods do
         kind == :flash ? data.delete_if { |k, _| k =='deleteme' } : data
       end
 
-      Squash::Ruby.should_receive(:notify).once.with(anything, hash_including(:flash => {'dontdelete' => 'keep'}))
-      fl               = ActionController::Flash::FlashHash.new
+      expect(Squash::Ruby).to receive(:notify).once.with(anything, hash_including(:flash => { 'dontdelete' => 'keep' }))
+      fl               = if defined?(ActionDispatch)
+                           ActionDispatch::Flash::FlashHash.new
+                         else
+                           ActionController::Flash::FlashHash.new
+                         end
       fl['deleteme']   = 'delete'
       fl['dontdelete'] = 'keep'
-      stub!(:flash).and_return(fl)
+      allow(self).to receive(:flash).and_return(fl)
       notify_squash @exception
     end
 
@@ -166,9 +131,9 @@ describe Squash::Ruby::ControllerMethods do
         kind == :cookies ? data.delete_if { |k, _| k =='deleteme' } : data
       end
 
-      Squash::Ruby.should_receive(:notify).once.with(anything, hash_including(:cookies => {'dontdelete' => 'keep'}))
+      expect(Squash::Ruby).to receive(:notify).once.with(anything, hash_including(:cookies => {'dontdelete' => 'keep'}))
       jar = Object.new; jar.send(:instance_variable_set, :@cookies, {'deleteme' => 'delete', 'dontdelete' => 'keep'})
-      stub!(:cookies).and_return(jar)
+      allow(self).to receive(:cookies).and_return(jar)
       notify_squash @exception
     end
   end
@@ -193,22 +158,22 @@ describe Squash::Ruby::ControllerMethods do
     end
 
     it "should call Squash::Ruby.record with additional Rails information (exception, message, user data)" do
-      Squash::Ruby.should_receive(:record).with(ArgumentError, "foobar", hash_including(@railsish.merge(:user => 'data')))
+      expect(Squash::Ruby).to receive(:record).with(ArgumentError, "foobar", hash_including(@railsish.merge(:user => 'data')))
       record_to_squash ArgumentError, 'foobar', :user => 'data'
     end
 
     it "should call Squash::Ruby.record with additional Rails information (exception, message)" do
-      Squash::Ruby.should_receive(:record).with(ArgumentError, "foobar", hash_including(@railsish))
+      expect(Squash::Ruby).to receive(:record).with(ArgumentError, "foobar", hash_including(@railsish))
       record_to_squash ArgumentError, 'foobar'
     end
 
     it "should call Squash::Ruby.record with additional Rails information (message, user data)" do
-      Squash::Ruby.should_receive(:record).with(StandardError, "foobar", hash_including(@railsish.merge(:user => 'data')))
+      expect(Squash::Ruby).to receive(:record).with(StandardError, "foobar", hash_including(@railsish.merge(:user => 'data')))
       record_to_squash 'foobar', :user => 'data'
     end
 
     it "should call Squash::Ruby.record with additional Rails information (message)" do
-      Squash::Ruby.should_receive(:record).with(StandardError, "foobar", hash_including(@railsish))
+      expect(Squash::Ruby).to receive(:record).with(StandardError, "foobar", hash_including(@railsish))
       record_to_squash 'foobar'
     end
   end
@@ -228,7 +193,7 @@ describe Squash::Ruby::ControllerMethods::ClassMethods do
       end
 
       enable_squash_client
-      @filter.should eql(:_squash_around_filter)
+      expect(@filter).to eql(:_squash_around_filter)
     end
 
     it "should pass options through" do
@@ -240,7 +205,7 @@ describe Squash::Ruby::ControllerMethods::ClassMethods do
       end
 
       enable_squash_client :only => :foo
-      @options.should eql(:only => :foo)
+      expect(@options).to eql(:only => :foo)
     end
   end
 end
