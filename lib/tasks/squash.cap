@@ -12,16 +12,22 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
+require 'active_support/core_ext/enumerable'
+require 'active_support/core_ext/object/try'
+
 # Capistrano tasks for Rails apps using Squash.
 
-set :current_revision, lambda { `git rev-parse #{fetch :branch}`.chomp }
+set :_squash_current_revision, lambda {
+  origin = `git ls-remote #{fetch(:repo_url)}`.chomp.lines.map { |l| l.split(/\s+/) }.index_by(&:last)
+  origin["refs/heads/#{fetch :branch}"].try!(:first) ||`git rev-parse #{fetch :branch}`.chomp
+}
 
 namespace :squash do
   # USAGE: before 'deploy:publishing', 'squash:write_revision'
   desc "Writes a REVISION file to the application's root directory"
   task :write_revision do
     on roles(:app) do
-      execute %{echo "#{fetch :current_revision}" > #{release_path.join('REVISION')}}
+      execute %{echo "#{fetch :_squash_current_revision}" > #{release_path.join('REVISION')}}
     end
   end
 
@@ -35,7 +41,7 @@ namespace :squash do
                     else
                       'script/rails'
                     end
-          execute command, "runner 'Squash::Ruby.notify_deploy #{fetch(:rails_env).inspect}, #{fetch(:current_revision).inspect}, #{Socket.gethostname.inspect}'"
+          execute command, "runner 'Squash::Ruby.notify_deploy #{fetch(:rails_env).inspect}, #{fetch(:_squash_current_revision).inspect}, #{Socket.gethostname.inspect}'"
         end
       end
     end
