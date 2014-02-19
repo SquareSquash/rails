@@ -18,8 +18,14 @@ require 'active_support/core_ext/object/try'
 # Capistrano tasks for Rails apps using Squash.
 
 set :_squash_current_revision, lambda {
-  origin = `git ls-remote #{fetch(:repo_url)}`.chomp.lines.map { |l| l.split(/\s+/) }.index_by(&:last)
-  origin["refs/heads/#{fetch :branch}"].try!(:first) ||`git rev-parse #{fetch :branch}`.chomp
+  rev = nil
+  on roles(:web), :limit => 1 do
+    within repo_path do
+      origin = capture("git ls-remote #{fetch(:repo_url)}").chomp.lines.map { |l| l.split(/\s+/) }.index_by(&:last)
+      rev    = origin["refs/heads/#{fetch :branch}"].try!(:first) || capture("git rev-parse #{fetch :branch}").chomp
+    end
+  end
+  rev
 }
 
 namespace :squash do
