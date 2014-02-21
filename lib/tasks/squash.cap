@@ -19,7 +19,7 @@ require 'active_support/core_ext/object/try'
 
 set :_squash_current_revision, lambda {
   rev = nil
-  on roles(:web), :limit => 1 do
+  on roles(:web), :in => :sequence, :limit => 1 do
     within repo_path do
       origin = capture("git ls-remote #{fetch(:repo_url)}").chomp.lines.map { |l| l.split(/\s+/) }.index_by(&:last)
       rev    = origin["refs/heads/#{fetch :branch}"].try!(:first) || capture("git rev-parse #{fetch :branch}").chomp
@@ -32,7 +32,9 @@ namespace :squash do
   # USAGE: before 'deploy:publishing', 'squash:write_revision'
   desc "Writes a REVISION file to the application's root directory"
   task :write_revision do
-    on roles(:app) do
+    # must be run in serial because the fetch for _squash_current_revision results
+    # in a deadlock otherwise
+    on roles(:app), :in => :sequence, :limit => 1 do
       execute %{echo "#{fetch :_squash_current_revision}" > #{release_path.join('REVISION')}}
     end
   end
