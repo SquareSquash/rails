@@ -44,7 +44,7 @@ namespace :squash do
     on roles(:web), :limit => 1 do |host|
       within release_path do
         with rails_env: fetch(:rails_env) do
-          execute :rake, "squash:notify[#{fetch(:current_revision)},#{host}]"
+          execute :rake, "squash:notify[#{fetch(:current_revision)}]"
         end
       end
     end
