@@ -41,15 +41,10 @@ namespace :squash do
 
   desc "Notifies Squash of a new deploy"
   task :notify do
-    on roles(:web), :limit => 1 do
+    on roles(:web), :limit => 1 do |host|
       within release_path do
-        with :rails_env => fetch(:rails_env) do
-          command = if test("[ -e #{release_path.join('bin', 'rails')} ]")
-                      'bin/rails'
-                    else
-                      'script/rails'
-                    end
-          execute command, "runner 'Squash::Ruby.notify_deploy #{fetch(:rails_env).inspect}, #{fetch(:_squash_current_revision).inspect}, #{Socket.gethostname.inspect}'"
+        with rails_env: fetch(:rails_env) do
+          execute :rake, "squash:notify[#{fetch(:current_revision)}]"
         end
       end
     end
