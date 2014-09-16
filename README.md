@@ -102,10 +102,10 @@ else should be taken care of. For **Capistrano 3**, just add
 
 If you do not deploy to a live Git directory, you will need to write a
 `REVISION` file to your app root. To do this, include the following in your
-`config/deploy.rb` file in Capistrano 3:
+`config/deploy.rb` file in Capistrano 2 or 3:
 
 ```` ruby
-before 'deploy:publishing', 'squash:write_revision'
+before 'deploy:compile_assets', 'squash:write_revision'
 ````
 
 or in Capistrano 2:
